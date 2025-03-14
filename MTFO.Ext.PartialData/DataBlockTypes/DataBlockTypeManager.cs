@@ -1,11 +1,10 @@
 ﻿using GameData;
-using Gear;
 using Globals;
+using HarmonyLib;
 using LevelGeneration;
 using MTFO.Ext.PartialData.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Logger = MTFO.Ext.PartialData.Utils.Logger;
 
@@ -20,13 +19,9 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
         {
             try
             {
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                var asm = assemblies
-                    .Where(a => !a.IsDynamic && a.Location.Contains("interop", StringComparison.InvariantCultureIgnoreCase))
-                    .First(a => a.Location.EndsWith("Modules-ASM.dll", StringComparison.InvariantCultureIgnoreCase));
-
                 var dataBlockTypes = new List<Type>();
-                foreach (var type in asm.ExportedTypes)
+                var types = AccessTools.GetTypesFromAssembly(typeof(GameDataBlockBase<>).Assembly);
+                foreach (var type in types)
                 {
                     if (type == null)
                         continue;
@@ -105,7 +100,7 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
                         {
                             Logger.Error($"{e}");
                         }
-                        
+
 
                         rundownPage.m_currentRundownData = GameDataBlockBase<RundownDataBlock>.GetBlock(Global.RundownIdToLoad);
                         if (rundownPage.m_currentRundownData != null)
@@ -144,6 +139,13 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
                                 LG_BuildZoneLightsJob.ApplyLightSettings(0, node.m_lightsInNode, zone.m_lightSettings, false);
                             }
                         }
+                    });
+                    break;
+
+                case "text":
+                    blockTypeCache.RegisterOnChangeEvent(() =>
+                    {
+                        TextDBUtil.RefreshTranslation();
                     });
                     break;
             }
