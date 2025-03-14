@@ -1,4 +1,5 @@
 ﻿using GameData;
+using MTFO.Ext.PartialData.Interops;
 using MTFO.Ext.PartialData.Utils;
 using System;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
         public Action OnForceChange;
         public string FullName { get; private set; }
         public string ShortenName { get; private set; }
+
+        public InheritanceConnector<T> InheritanceConnector { get; private set; } = new();
 
         public DataBlockTypeWrapper()
         {
@@ -26,8 +29,11 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
         public void AddBlock(T block)
         {
             var existingBlock = GameDataBlockBase<T>.GetBlock(block.persistentID);
+            InheritanceConnector.AddInheritance(block);
+
             if (existingBlock != null)
             {
+                InheritanceConnector.ApplyAllInheritance();
                 CopyProperties(block, existingBlock);
                 if (EntryPoint.LogEditBlock)
                 {
@@ -119,5 +125,8 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
         {
             OnForceChange += onChanged;
         }
+
+        public void CacheInheritance(JsonElement objNode, JsonElement idNode) => InheritanceConnector.CacheInheritance(objNode, idNode);
+        public void ApplyInheritance() => InheritanceConnector.ApplyAllInheritance();
     }
 }

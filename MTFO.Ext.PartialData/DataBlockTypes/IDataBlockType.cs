@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 namespace MTFO.Ext.PartialData.DataBlockTypes
 {
@@ -15,5 +16,9 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
         void OnChanged();
 
         void RegisterOnChangeEvent(Action onChanged);
+
+        void CacheInheritance(JsonElement objNode, JsonElement idNode);
+
+        void ApplyInheritance();
     }
 }

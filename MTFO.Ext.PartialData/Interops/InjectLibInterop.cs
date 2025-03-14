@@ -1,6 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP;
 using InjectLib.JsonNETInjection;
-using InjectLib.JsonNETInjection.Supports;
+using MTFO.Ext.PartialData.JsonConverters;
 using MTFO.Ext.PartialData.JsonConverters.InjectLibConverters;
 using MTFO.Ext.PartialData.Utils;
 using System;
@@ -37,9 +37,7 @@ namespace MTFO.Ext.PartialData.Interops
         {
             JsonInjector.SetConverter(new Il2CppPersistentIDConverter());
             JsonInjector.SetConverter(new Il2CppLocalizedTextConverter());
-
-            InjectLibConnector = new InjectLibConnector();
-            JSON.Setting.Converters.Add(InjectLibConnector);
+            JSON.Setting.Converters.Add(new InjectLibConnectorWrapper());
         }
     }
 }

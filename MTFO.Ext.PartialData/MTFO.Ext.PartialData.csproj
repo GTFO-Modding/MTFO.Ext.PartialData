@@ -38,6 +38,7 @@
 	<ItemGroup>
 		<Reference Include="$(PluginsFolder)/**/GTFO-API.dll" Private="false" />
 		<Reference Include="$(PluginsFolder)/**/InjectLib.dll" Private="false" />
+		<Reference Include="$(PluginsFolder)/**/InheritanceDataBlocks.dll" Private="false" />
 	</ItemGroup>
 </Project>
  
