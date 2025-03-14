@@ -8,10 +8,12 @@ namespace MTFO.Ext.PartialData.Utils
     internal static class JSON
     {
         public readonly static JsonSerializerOptions Setting;
+        public readonly static JsonSerializerOptions SettingWithoutInjectLib;
 
         static JSON()
         {
             Setting = CreateSetting();
+            SettingWithoutInjectLib = CreateSetting();
         }
 
         private static JsonSerializerOptions CreateSetting()
@@ -34,9 +36,9 @@ namespace MTFO.Ext.PartialData.Utils
             return setting;
         }
 
-        public static T Deserialize<T>(string json)
+        public static T Deserialize<T>(string json, bool includeInjectLib = true)
         {
-            return JsonSerializer.Deserialize<T>(json, Setting);
+            return JsonSerializer.Deserialize<T>(json, includeInjectLib ? Setting : SettingWithoutInjectLib);
         }
 
         public static object Deserialize(string json, Type type)

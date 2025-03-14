@@ -4,6 +4,7 @@ using InjectLib.JsonNETInjection.Supports;
 using MTFO.Ext.PartialData.JsonConverters.InjectLibConverters;
 using MTFO.Ext.PartialData.Utils;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MTFO.Ext.PartialData.Interops
 {
@@ -22,18 +23,23 @@ namespace MTFO.Ext.PartialData.Interops
                 try
                 {
                     IsLoaded = true;
-
-                    JsonInjector.SetConverter(new Il2CppPersistentIDConverter());
-                    JsonInjector.SetConverter(new Il2CppLocalizedTextConverter());
-
-                    InjectLibConnector = new InjectLibConnector();
-                    JSON.Setting.Converters.Add(InjectLibConnector);
+                    SetupInjectLibSupports();
                 }
                 catch (Exception e)
                 {
                     Logger.Error($"Exception thrown while reading data from GTFO.InjectLib: {e}");
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void SetupInjectLibSupports()
+        {
+            JsonInjector.SetConverter(new Il2CppPersistentIDConverter());
+            JsonInjector.SetConverter(new Il2CppLocalizedTextConverter());
+
+            InjectLibConnector = new InjectLibConnector();
+            JSON.Setting.Converters.Add(InjectLibConnector);
         }
     }
 }
