@@ -15,6 +15,7 @@
 	<Version>0.1.0</Version>
 	<RootNamespace>MTFO.Ext.PartialData</RootNamespace>
 	<Platforms>x64</Platforms>
+	<LangVersion>latest</LangVersion>
 </PropertyGroup>
 
 	<!-- BepInEx libs -->
