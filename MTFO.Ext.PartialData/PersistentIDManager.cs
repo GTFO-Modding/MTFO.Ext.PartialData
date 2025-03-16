@@ -4,7 +4,7 @@ using System.IO;
 
 namespace MTFO.Ext.PartialData
 {
-    internal static class PersistentIDManager
+    public static class PersistentIDManager
     {
         private readonly static Dictionary<string, uint> _GUIDDict = new Dictionary<string, uint>();
 
