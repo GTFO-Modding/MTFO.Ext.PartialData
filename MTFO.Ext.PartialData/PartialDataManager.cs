@@ -95,8 +95,8 @@ namespace MTFO.Ext.PartialData
 
         private static void AssignPersistentID(string file)
         {
-            var json = File.ReadAllText(file);
-            using var doc = JsonDocument.Parse(json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+            using var fs = File.OpenRead(file);
+            using var doc = JsonDocument.Parse(fs, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
 
             var root = doc.RootElement;
             switch (root.ValueKind)
@@ -132,12 +132,6 @@ namespace MTFO.Ext.PartialData
                     Read(root, false, debugName);
                     break;
             }
-        }
-
-        private static void ReadChangedFile(string file)
-        {
-            var json = File.ReadAllText(file);
-            ReadChangedFile(json, file);
         }
 
         private static void Read(JsonElement objNode, bool assignID, string debugName)

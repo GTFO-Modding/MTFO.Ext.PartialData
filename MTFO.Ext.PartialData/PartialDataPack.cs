@@ -1,11 +1,8 @@
-﻿using GTFO.API.Utilities;
-using MTFO.Ext.PartialData.DataBlockTypes;
+﻿using MTFO.Ext.PartialData.DataBlockTypes;
 using MTFO.Ext.PartialData.Utils;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 
 namespace MTFO.Ext.PartialData
@@ -107,8 +104,8 @@ namespace MTFO.Ext.PartialData
 
         private void AllocateGUIDFromFile(string file)
         {
-            var json = File.ReadAllText(file);
-            using var doc = JsonDocument.Parse(json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+            using var fs = File.OpenRead(file);
+            using var doc = JsonDocument.Parse(fs, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
 
             var root = doc.RootElement;
             switch (root.ValueKind)
@@ -122,27 +119,6 @@ namespace MTFO.Ext.PartialData
 
                 case JsonValueKind.Object:
                     Read(root, true, file);
-                    break;
-            }
-        }
-
-        private void ReadChangedFile(string file)
-        {
-            var json = File.ReadAllText(file);
-            using var doc = JsonDocument.Parse(json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
-
-            var root = doc.RootElement;
-            switch (root.ValueKind)
-            {
-                case JsonValueKind.Array:
-                    foreach (var element in root.EnumerateArray())
-                    {
-                        Read(element, false, file);
-                    }
-                    break;
-
-                case JsonValueKind.Object:
-                    Read(root, false, file);
                     break;
             }
         }
@@ -173,7 +149,7 @@ namespace MTFO.Ext.PartialData
             }
         }
 
-        
+
 
         private void Read(JsonElement objNode, bool assignID, string debugName)
         {
