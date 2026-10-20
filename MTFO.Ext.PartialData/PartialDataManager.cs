@@ -46,7 +46,6 @@ namespace MTFO.Ext.PartialData
             {
                 Logger.Error("Config File is missing! (_config.json) Creating new one!");
                 File.WriteAllText(ConfigPath, "[]");
-                return false;
             }
 
 
