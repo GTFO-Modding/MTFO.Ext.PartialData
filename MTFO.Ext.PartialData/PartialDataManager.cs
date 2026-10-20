@@ -44,7 +44,8 @@ namespace MTFO.Ext.PartialData
             ConfigPath = Path.GetFullPath(Path.Combine(PartialDataPath, "_config.json"));
             if (!File.Exists(ConfigPath))
             {
-                Logger.Error("Unable to setup PartialData::Config File (_config.json) is missing");
+                Logger.Error("Config File is missing! (_config.json) Creating new one!");
+                File.WriteAllText(ConfigPath, "[]");
                 return false;
             }
 
