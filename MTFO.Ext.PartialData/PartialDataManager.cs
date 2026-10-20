@@ -23,6 +23,7 @@ namespace MTFO.Ext.PartialData
         private static List<DataBlockDefinition> _Config;
         private static readonly List<string> _AddedFileList = new();
         private static readonly List<PartialDataCache> _DataCache = new();
+        private static readonly Queue<JsonDocument> _DocumentsToDispose = new();
 
         internal static bool Initialize()
         {
@@ -96,7 +97,9 @@ namespace MTFO.Ext.PartialData
         private static void AssignPersistentID(string file)
         {
             using var fs = File.OpenRead(file);
-            using var doc = JsonDocument.Parse(fs, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+
+            var doc = JsonDocument.Parse(fs, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+            _DocumentsToDispose.Enqueue(doc);
 
             var root = doc.RootElement;
             switch (root.ValueKind)
@@ -104,19 +107,21 @@ namespace MTFO.Ext.PartialData
                 case JsonValueKind.Array:
                     foreach (var element in root.EnumerateArray())
                     {
-                        Read(element, true, file);
+                        Read(element, assignID: true, file);
                     }
                     break;
 
                 case JsonValueKind.Object:
-                    Read(root, true, file);
+                    Read(root, assignID: true, file);
                     break;
             }
         }
 
-        private static void ReadChangedFile(string content, string debugName)
+        private static void ReadChangedFile(string path, string debugName)
         {
-            using var doc = JsonDocument.Parse(content, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+            using var fs = File.OpenRead(path);
+            var doc = JsonDocument.Parse(fs, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+            _DocumentsToDispose.Enqueue(doc);
 
             var root = doc.RootElement;
             switch (root.ValueKind)
@@ -124,12 +129,12 @@ namespace MTFO.Ext.PartialData
                 case JsonValueKind.Array:
                     foreach (var element in root.EnumerateArray())
                     {
-                        Read(element, false, debugName);
+                        Read(element, assignID: false, debugName);
                     }
                     break;
 
                 case JsonValueKind.Object:
-                    Read(root, false, debugName);
+                    Read(root, assignID: false, debugName);
                     break;
             }
         }
@@ -175,7 +180,7 @@ namespace MTFO.Ext.PartialData
                 _DataCache.Add(partialDataCache);
             }
 
-            partialDataCache.JsonsToRead.Enqueue(objNode.ToString());
+            partialDataCache.JsonsToRead.Enqueue(objNode);
             cache.CacheInheritance(objNode, idNode);
         }
 
@@ -186,21 +191,18 @@ namespace MTFO.Ext.PartialData
 
             if (CanLiveEdit)
             {
-                var listener = LiveEdit.CreateListener(PartialDataPath, "*.json", includeSubDir: true);
-                listener.FileChanged += Listener_FileChanged1;
+                var sfw = SafeFileSystemWatcher.Create(PartialDataPath, ["*.json", "*.jsonc"], includeSubDir: true);
+                sfw.OnChanged += OnFileChanged;
             }
 
             AddAllCache();
         }
 
-        private static void Listener_FileChanged1(LiveEditEventArgs e)
+        private static void OnFileChanged(FileEventArgs e)
         {
             Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
-            LiveEdit.TryReadFileContent(e.FullPath, (content) =>
-            {
-                ReadChangedFile(content, e.FullPath);
-                AddAllCache(true);
-            });
+            ReadChangedFile(e.FullPath, debugName: e.FullPath);
+            AddAllCache(isLiveEdit: true);
         }
 
         internal static void WriteAllFile(string path)
@@ -221,9 +223,8 @@ namespace MTFO.Ext.PartialData
             foreach (var cache in _DataCache)
             {
                 bool isChanged = false;
-                while (cache.JsonsToRead.Count > 0)
+                while (cache.JsonsToRead.TryDequeue(out var json))
                 {
-                    var json = cache.JsonsToRead.Dequeue();
                     cache.DataBlockType.AddJsonBlock(json);
                     isChanged = true;
                 }
@@ -234,6 +235,14 @@ namespace MTFO.Ext.PartialData
                 {
                     cache.DataBlockType.OnChanged();
                 }
+            }
+
+            while (_DocumentsToDispose.TryDequeue(out var doc))
+            {
+                if (doc == null)
+                    continue;
+
+                doc.Dispose();
             }
         }
 

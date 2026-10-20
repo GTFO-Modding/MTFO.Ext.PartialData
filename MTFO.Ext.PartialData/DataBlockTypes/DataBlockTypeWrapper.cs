@@ -50,12 +50,11 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
 
         }
 
-        public void AddJsonBlock(string json)
+        public void AddJsonBlock(JsonElement json)
         {
             try
             {
-                var doc = JsonDocument.Parse(json, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip });
-                switch (doc.RootElement.ValueKind)
+                switch (json.ValueKind)
                 {
                     case JsonValueKind.Array:
                         T[] blocks = (T[])JSON.Deserialize(json, typeof(T).MakeArrayType());

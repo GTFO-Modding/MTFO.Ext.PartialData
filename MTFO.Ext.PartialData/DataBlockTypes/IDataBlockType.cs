@@ -11,7 +11,7 @@ namespace MTFO.Ext.PartialData.DataBlockTypes
 
         void DoSaveToDisk(string fullPath);
 
-        void AddJsonBlock(string json);
+        void AddJsonBlock(JsonElement json);
 
         void OnChanged();
 

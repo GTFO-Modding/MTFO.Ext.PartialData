@@ -41,7 +41,17 @@ namespace MTFO.Ext.PartialData.Utils
             return JsonSerializer.Deserialize<T>(json, includeInjectLib ? Setting : SettingWithoutInjectLib);
         }
 
+        public static T Deserialize<T>(JsonElement json, bool includeInjectLib = true)
+        {
+            return JsonSerializer.Deserialize<T>(json, includeInjectLib ? Setting : SettingWithoutInjectLib);
+        }
+
         public static object Deserialize(string json, Type type)
+        {
+            return JsonSerializer.Deserialize(json, type, Setting);
+        }
+
+        public static object Deserialize(JsonElement json, Type type)
         {
             return JsonSerializer.Deserialize(json, type, Setting);
         }

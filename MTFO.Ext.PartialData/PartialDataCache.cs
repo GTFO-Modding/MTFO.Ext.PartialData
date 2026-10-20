@@ -1,5 +1,6 @@
 ﻿using MTFO.Ext.PartialData.DataBlockTypes;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace MTFO.Ext.PartialData
 {
@@ -14,7 +15,7 @@ namespace MTFO.Ext.PartialData
         }
 
         public IDataBlockType DataBlockType { get; private set; }
-        public Queue<string> JsonsToRead { get; private set; } = new Queue<string>();
+        public Queue<JsonElement> JsonsToRead { get; private set; } = new Queue<JsonElement>();
 
         private PartialDataCache()
         {
